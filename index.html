@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Porto Andante Zone Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="lib/leaflet/leaflet.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>🚇 Porto Andante Zone Calculator</h1>
+            <p>Calculate the right Andante ticket for your journey in Porto</p>
+        </header>
+        
+        <nav class="tab-nav">
+            <button class="tab-btn active" onclick="showTab('calculator')">
+                🧮 Calculator
+            </button>
+            <button class="tab-btn" onclick="showTab('map')">
+                🗺️ Map
+            </button>
+            <button class="tab-btn" onclick="showTab('settings')">
+                ⚙️ Settings
+            </button>
+        </nav>
+        
+        <main class="app-main">
+            <div id="calculator-tab" class="tab-content active">
+                <div id="zone-calculator-container"></div>
+            </div>
+            
+            <div id="map-tab" class="tab-content">
+                <div class="map-controls">
+                    <button class="reset-map-btn" onclick="window.resetMap()">
+                        🔄 Reset to all zones
+                    </button>
+                </div>
+                <div id="map-container" style="height: 500px; width: 100%;"></div>
+            </div>
+            
+            <div id="settings-tab" class="tab-content">
+                <div id="settings-container"></div>
+            </div>
+        </main>
+        
+        <footer class="app-footer">
+            <p>
+                <small>
+                    Unofficial app using public transport data. 
+                    For official information visit <a href="https://andante.pt/en/" target="_blank">andante.pt</a>
+                </small>
+            </p>
+        </footer>
+    </div>
+    
+    <script>
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked tab button
+            event.target.classList.add('active');
+            
+            // Initialize settings view if needed
+            if (tabName === 'settings') {
+                import('./features/settings/SettingsView.js').then(module => {
+                    module.initializeSettings();
+                });
+            }
+            
+            // Initialize map view if needed
+            if (tabName === 'map') {
+                import('./features/map/MapView.js').then(module => {
+                    module.initializeMap();
+                });
+            }
+        }
+        
+        // Global reset map function
+        window.resetMap = function() {
+            import('./features/map/MapView.js').then(module => {
+                const mapView = module.getMapInstance();
+                if (mapView) {
+                    mapView.showAllZones();
+                }
+            }).catch(() => {
+                // Map not loaded yet, ignore
+            });
+        }
+    </script>
+    
+    <!-- Leaflet -->
+    <script src="lib/leaflet/leaflet.js"></script>
+    
+    <!-- Load the main application -->
+    <script type="module" src="features/zone-calculator/ZoneCalculatorView.js"></script>
+</body>
+</html>
